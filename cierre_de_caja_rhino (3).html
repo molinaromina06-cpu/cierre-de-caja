@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cierre de Caja — RHINO AUTO TEST</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f4f0; --surface: #ffffff; --border: #e2e0d8;
+    --text: #1a1916; --text2: #6b6960; --text3: #9e9c93;
+    --accent: #1a1916; --green: #0d5c3a; --green-bg: #e8f5ee;
+    --red: #8b2323; --red-bg: #fdeaea; --radius: 10px; --radius-lg: 16px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 560px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 2rem; }
+  .brand-logo { width: 48px; height: 48px; background: var(--accent); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: 600; }
+  .brand-name { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+  .brand-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; margin-bottom: 1rem; }
+  .card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .card-header .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .card-header span { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); }
+  .card-body { padding: 1.25rem; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .field-row.single { grid-template-columns: 1fr; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .field input { font-family: 'DM Mono', monospace; font-size: 14px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); transition: border-color 0.15s; width: 100%; }
+  .field input:focus { outline: none; border-color: var(--accent); background: white; }
+  .field input::placeholder { color: var(--text3); }
+  .field input[type="date"] { font-family: 'DM Sans', sans-serif; }
+  .totales-grid { display: flex; flex-direction: column; }
+  .total-line { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .total-line:last-child { border-bottom: none; }
+  .total-line .lbl { color: var(--text2); }
+  .total-line .val { font-family: 'DM Mono', monospace; font-weight: 500; }
+  .total-line.grande { padding-top: 12px; margin-top: 4px; }
+  .total-line.grande .lbl { font-size: 15px; font-weight: 600; color: var(--text); }
+  .total-line.grande .val { font-size: 17px; }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+  .btn { width: 100%; padding: 13px; background: var(--accent); color: white; border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s, transform 0.1s; margin-top: 1rem; }
+  .btn:hover { opacity: 0.85; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .status { margin-top: 12px; padding: 11px 14px; border-radius: var(--radius); font-size: 13px; font-weight: 500; display: none; align-items: center; gap: 8px; }
+  .status.ok { display: flex; background: var(--green-bg); color: var(--green); border: 1px solid #b8deca; }
+  .status.err { display: flex; background: var(--red-bg); color: var(--red); border: 1px solid #f5c0c0; }
+  .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .footer { text-align: center; font-size: 12px; color: var(--text3); margin-top: 1.5rem; padding-bottom: 1rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="brand">
+    <div class="brand-logo">R</div>
+    <div>
+      <div class="brand-name">RHINO AUTO TEST</div>
+      <div class="brand-sub">Cierre de caja diario</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="dot"></div><span>Fecha</span></div>
+    <div class="card-body">
+      <div class="field-row single">
+        <div class="field"><label>Fecha del cierre</label><input type="date" id="fecha"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="dot"></div><span>Apertura</span></div>
+    <div class="card-body">
+      <div class="field-row single">
+        <div class="field"><label>Saldo inicial</label><input type="number" id="saldo_inicial" placeholder="0.00" min="0" step="0.01"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="dot"></div><span>Ingresos del día</span></div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field"><label>Efectivo</label><input type="number" id="efectivo" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="field"><label>Tarjeta débito</label><input type="number" id="tarjeta_debito" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="field"><label>Tarjeta crédito</label><input type="number" id="tarjeta_credito" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="field"><label>Transferencia</label><input type="number" id="transferencia" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="field"><label>QR</label><input type="number" id="qr" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="field"><label>Go cuota</label><input type="number" id="go_cuota" placeholder="0.00" min="0" step="0.01"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="dot"></div><span>Ajustes</span></div>
+    <div class="card-body">
+      <div class="field-row">
+        <div class="field"><label>Devolución</label><input type="number" id="devolucion" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="field"><label>Retiro</label><input type="number" id="retiro" placeholder="0.00" min="0" step="0.01"></div>
+      </div>
+      <div class="field-row single" style="margin-top:10px">
+        <div class="field"><label>Total informado</label><input type="number" id="total_informado" placeholder="0.00" min="0" step="0.01"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="dot"></div><span>Resumen</span></div>
+    <div class="card-body">
+      <div class="totales-grid">
+        <div class="total-line"><span class="lbl">Total ingresos</span><span class="val" id="r_ingresos">$ 0.00</span></div>
+        <div class="total-line"><span class="lbl">Saldo inicial</span><span class="val" id="r_saldo">$ 0.00</span></div>
+        <div class="total-line"><span class="lbl">Devoluciones</span><span class="val" id="r_dev">$ 0.00</span></div>
+        <div class="total-line"><span class="lbl">Retiros</span><span class="val" id="r_ret">$ 0.00</span></div>
+        <div class="total-line grande"><span class="lbl">Total calculado</span><span class="val" id="r_total">$ 0.00</span></div>
+        <div class="total-line"><span class="lbl">Diferencia (vs. informado)</span><span class="val" id="r_diff">$ 0.00</span></div>
+      </div>
+    </div>
+  </div>
+  <button class="btn" id="btnEnviar" onclick="enviar()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+    Registrar en Google Sheets
+  </button>
+  <div class="status" id="status"></div>
+  <div class="footer">RHINO AUTO TEST · Cierre de caja</div>
+</div>
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4YKmPlmlFJIGUHVXIzwoqape_DHzo4jwSpgo-QyW1EyY-QdjY2y_tdQP0LpOo0Nu6/exec";
+function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
+function fmt(n) { return "$ " + n.toFixed(2); }
+function calcular() {
+  const ing = v("efectivo") + v("tarjeta_debito") + v("tarjeta_credito") + v("transferencia") + v("qr") + v("go_cuota");
+  const total = v("saldo_inicial") + ing - v("devolucion") - v("retiro");
+  const diff = total - v("total_informado");
+  document.getElementById("r_ingresos").textContent = fmt(ing);
+  document.getElementById("r_saldo").textContent = fmt(v("saldo_inicial"));
+  document.getElementById("r_dev").textContent = fmt(v("devolucion"));
+  document.getElementById("r_ret").textContent = fmt(v("retiro"));
+  document.getElementById("r_total").textContent = fmt(total);
+  const el = document.getElementById("r_diff");
+  el.textContent = (diff >= 0 ? "+" : "") + fmt(diff);
+  el.className = "val " + (diff > 0 ? "pos" : diff < 0 ? "neg" : "");
+  return { ing, total, diff };
+}
+document.querySelectorAll("input").forEach(el => el.addEventListener("input", calcular));
+async function enviar() {
+  const btn = document.getElementById("btnEnviar");
+  const st = document.getElementById("status");
+  st.className = "status"; st.textContent = "";
+  const fecha = document.getElementById("fecha").value;
+  if (!fecha) { st.className = "status err"; st.innerHTML = "⚠️ Ingresá una fecha antes de continuar."; return; }
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Enviando...';
+  try {
+    const { ing, total, diff } = calcular();
+    const row = [
+      fecha, v("saldo_inicial"), v("efectivo"), v("tarjeta_debito"),
+      v("tarjeta_credito"), v("transferencia"), v("qr"), v("go_cuota"),
+      v("devolucion"), v("total_informado"), v("retiro"), ing, total, diff
+    ];
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ row })
+    });
+    st.className = "status ok";
+    st.innerHTML = "✓ Cierre registrado correctamente en Google Sheets.";
+    document.querySelectorAll("input[type=number]").forEach(el => el.value = "");
+    calcular();
+  } catch(e) {
+    st.className = "status err";
+    st.textContent = "Error: " + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Registrar en Google Sheets';
+  }
+}
+document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+calcular();
+</script>
+</body>
+</html>
