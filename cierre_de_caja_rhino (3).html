@@ -125,11 +125,13 @@
   <div class="footer">RHINO AUTO TEST · Cierre de caja</div>
 </div>
 <script>
+const formData = new FormData();
+formData.append("data", JSON.stringify({ row }));
 await fetch(SCRIPT_URL, {
   method: "POST",
   mode: "no-cors",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ row })
+  body: formData
+});
 });
 function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
 function fmt(n) { return "$ " + n.toFixed(2); }
